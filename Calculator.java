@@ -5,12 +5,6 @@ public class Calculator {
     private char[] exp;
     private int pointer;
 
-    public Calculator(String exp) {
-        this.originalExp = exp;
-        this.exp = exp.toCharArray();
-        this.pointer = 0;
-        this.removeWhiteSpaces();
-    }
 
     private void removeWhiteSpaces() {
         int i = 0;
@@ -34,7 +28,10 @@ public class Calculator {
         this.exp = temp;
     }
 
-    public double eval() {
+    public double eval(String exp) {
+        this.exp = exp.toCharArray();
+        this.pointer = 0;
+        this.removeWhiteSpaces();
         return parseS();
     }
 
@@ -193,20 +190,9 @@ public class Calculator {
 	}
     
 
-    public String toString() {
-        return originalExp;
-    }
-
 	public void error() {
 		System.out.println("Syntax Error");
 		System.exit(1);
 	}
 
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-		while(true) {
-        	String exp = scanner.nextLine();
-        	System.out.println(new Calculator(exp).eval());
-		}
-    }
 }
