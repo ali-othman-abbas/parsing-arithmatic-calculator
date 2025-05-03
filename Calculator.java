@@ -1,7 +1,6 @@
 import java.util.Scanner;
 
 public class Calculator {
-    private String originalExp;
     private char[] exp;
     private int pointer;
 
@@ -35,66 +34,68 @@ public class Calculator {
         return parseS();
     }
 
-    private double parseS() {
+    private double parseS() { 
         double result = parseA();
+        while(pointer < exp.length && exp[pointer] != ')') {
+            char operator = exp[pointer];
 
-        if(pointer >= exp.length || exp[pointer] == ')')
-            return result;
-
-        char operator = exp[pointer];
-
-        switch (operator) {
-            case '+':
-                pointer++;
-                result = result + parseS();
-                break;
-
-            case '-':
-                pointer++;
-                result = result - parseS();
-                break;
+            pointer++;
+            switch (operator) {
+                case '+':
+                    result = result + parseA();
+                    break;
             
-            default: 
-				error();
-				break;
+                case '-':
+                    result = result - parseA();
+                    break;
+
+                default: 
+				    error();
+				    break;
+            }
+
         }
 
         return result;
+
     }
 
     private double parseA() {
         double result = parseT();
 
-        if(pointer >= exp.length || exp[pointer] == ')')
-            return result;
+        boolean flag = true;
+        while (pointer < exp.length && exp[pointer] != ')' && flag) {
+            char operator = exp[pointer];
 
-        char operator = exp[pointer];
+            switch (operator) {
+                case '*':
+                    pointer++;
+                    result = result * parseT();
+                    break;
 
-        switch (operator) {
-            case '*':
-                pointer++;
-                result = result * parseA();
-                break;
+                case '/':
+                    pointer++;
+                    result = result / parseT();
+                    break;
 
-            case '/':
-                pointer++;
-                result = result / parseA();
-                break;
+                case '%':
+                    pointer++;
+				    result = result % parseT();
+				    break;
 
-			case '%':
-				pointer++;
-				result = result % parseA();
-				break;
-
-			case '+':
-			case '-':
-				break;
+			    case '+':
+			    case '-':
+                    flag = false;
+				    break;
         
-            default:
-				break;
-		}
+                default:
+                    flag = false;
+				    break;
+		    }
 
+        }
         return result;
+
     }
 
     private double parseT() {
