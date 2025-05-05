@@ -1,4 +1,3 @@
-import java.util.Scanner;
 
 public class Calculator {
     private char[] exp;
@@ -8,9 +7,13 @@ public class Calculator {
     private void removeWhiteSpaces() {
         int i = 0;
 
+        //skip to space
         while(i < this.exp.length && this.exp[i] != ' ') {
             i++;
         }
+
+        if(i == this.exp.length)
+            return;
 
         int j = i + 1;
 
@@ -31,22 +34,23 @@ public class Calculator {
         this.exp = exp.toCharArray();
         this.pointer = 0;
         this.removeWhiteSpaces();
-        return parseS();
+        return parseExp();
     }
 
-    private double parseS() { 
-        double result = parseA();
+    private double parseExp() { 
+        //exp = term + term - term + term ... - term
+        double result = parseTerm(); 
         while(pointer < exp.length && exp[pointer] != ')') {
             char operator = exp[pointer];
 
             pointer++;
             switch (operator) {
                 case '+':
-                    result = result + parseA();
+                    result = result + parseTerm();
                     break;
             
                 case '-':
-                    result = result - parseA();
+                    result = result - parseTerm();
                     break;
 
                 default: 
@@ -60,8 +64,9 @@ public class Calculator {
 
     }
 
-    private double parseA() {
-        double result = parseT();
+    //term = fact*fact/fact*fact...*fact
+    private double parseTerm() {
+        double result = parseExponent();
 
         boolean flag = true;
         while (pointer < exp.length && exp[pointer] != ')' && flag) {
@@ -70,17 +75,17 @@ public class Calculator {
             switch (operator) {
                 case '*':
                     pointer++;
-                    result = result * parseT();
+                    result = result * parseExponent();
                     break;
 
                 case '/':
                     pointer++;
-                    result = result / parseT();
+                    result = result / parseExponent();
                     break;
 
                 case '%':
                     pointer++;
-				    result = result % parseT();
+				    result = result % parseExponent();
 				    break;
 
 			    case '+':
@@ -98,8 +103,8 @@ public class Calculator {
 
     }
 
-    private double parseT() {
-        double result = parseM();
+    private double parseExponent() {
+        double result = parseFactor();
 
         if (pointer >= exp.length || exp[pointer] == ')')
             return result;
@@ -108,7 +113,7 @@ public class Calculator {
         switch (operator) {
 			case '^':
             	pointer++;
-            	result = Math.pow(result, parseT());
+            	result = Math.pow(result, parseExponent());
 				break;
             case '*':
             case '/':
@@ -123,11 +128,13 @@ public class Calculator {
 		return result;
     }
 
-    private double parseM() {
+    //parses numbers, brackets, floating point numbers
+    private double parseFactor() {
         double result = 0;
+
         if(exp[pointer] == '(') {
             pointer++;
-            result = parseS();
+            result = parseExp();
 			if(pointer >= exp.length) {
 				error();
 				return result;
@@ -145,11 +152,16 @@ public class Calculator {
 			pointer++;
 			result = parseF();
 			return result;
+        } else if(exp[pointer] == '-') {
+            pointer++;
+            result = -1*parseFactor();
+            return result;
         } else {
 			return result;
 		}
     }
 
+    
     private double parseI() {
         double num = 0;
         while(pointer < exp.length && isDigit(exp[pointer])) {
